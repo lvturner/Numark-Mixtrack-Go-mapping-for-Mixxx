@@ -44,7 +44,7 @@ This controller has a built-in 4 channel output sound card, with a stereo Main o
 
 - The Numark Mixtrack Go's layout has 3 sections:
   - The middle holds the mixer related controls, library browsing and track loading controls.
-  - On each side there is a deck control area, where in Mixxx the left deck control will control Deck 1 and the right deck will control Deck 2. Each side can be switched to control the other deck of its pair (left: Deck 1 or 3, right: Deck 2 or 4) by holding the Headphone button and pressing Pad 1 on the left or Pad 2 on the right.
+  - On each side there is a deck control area, where in Mixxx the left deck control will control Deck 1 and the right deck will control Deck 2. Each side can be switched to control the other deck of its pair (left: Deck 1 or 3, right: Deck 2 or 4) by holding the Headphone button and pressing Pad 1.
   - Both decks have essentially the same controls each. What differs is that the left side also has the connector to the Main Output and on the right side there's both a USB-C plug and Headphones connector.
 
 ![alt text](numark_mixtrack_go_full.svg "Title")
@@ -65,7 +65,7 @@ This controller has a built-in 4 channel output sound card, with a stereo Main o
 | 5      | Cue Level      | Controls the Headphone Gain. In EQ mode (both Load buttons), controls the High EQ of the right deck (Deck 2 or 4). |
 | 6      | Level          | Controls each channel's Volume. In EQ mode (both Load buttons), controls the Mid EQ of the deck on that side (Deck 1 or 3 on the left, Deck 2 or 4 on the right). |
 | 7      | Filter/Low     | Controls the Quick Effect currently selected for that channel, or the Low EQ. Outside of EQ mode, use Shift + Load 1 to switch between the Effect and Low EQ. In EQ mode (both Load buttons), always controls the Low EQ. Select the Effect in the Mixxx graphical interface. |
-| 8      | Headphone      | Sends that channel's audio through the Headphone Output (the button latches, toggling on release; a quick tap acts as usual). Hold this button and press Pad 1 (left side) or Pad 2 (right side) to switch that side's deck between its pair: Deck 1 <-> 3 and Deck 2 <-> 4. The pad lights up while held and flashes briefly on release to confirm the change, then the pads, jogwheel and the mixer knobs control the other deck, and the active Pad Mode LED blinks to show that the deck is on its secondary channel. This combo does not toggle the headphone cue. Pressing Pad 1 or Pad 2 while holding the Headphone button resets the pad mode to Hotcue. |
+| 8      | Headphone      | Sends that channel's audio through the Headphone Output (the button latches, toggling on release; a quick tap acts as usual). Hold this button and press Pad 1 to switch that side's deck between its pair: Deck 1 <-> 3 and Deck 2 <-> 4. The pad lights up while held and flashes briefly on release to confirm the change, then the pads, jogwheel and the mixer knobs control the other deck, and the active Pad Mode LED blinks to show that the deck is on its secondary channel. This combo does not toggle the headphone cue. Pressing pad 1 while holding the Headphone button resets the pad mode to Hotcue. |
 | 9      | Fade FX        | This button toggles the Fade FX feature in Mixxx. When Fade FX is active, moving the Crossfader away from the current deck will activate the Quick Effect of that deck. When inactive, the Crossfader will work normally. |
 | 10      | Crossfader    | Fades between the Left and the Right channel. |
 

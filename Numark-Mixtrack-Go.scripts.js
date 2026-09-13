@@ -949,7 +949,7 @@ NumarkMixtrackGo.Deck = function(deckIndex, deckNumber) {
     this.padPressed = [false, false, false, false];
     this.pflPressed = false;
     const deckSelf = this;
-    const switchPadIndex = deckIndex === 0 ? 0 : 1; // left uses Pad 1, right uses Pad 2
+    const switchPadIndex = 0; // both sides use Pad 1
 
     // track every engine connection so they can be disconnected when the deck is
     // switched to another channel (the connections are fixed to a channel at creation)
