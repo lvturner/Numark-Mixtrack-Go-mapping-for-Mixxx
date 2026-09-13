@@ -816,6 +816,44 @@ NumarkMixtrackGo.vinylModeSwitcher = new components.Button({
     },
 });
 
+// in EQ mode (shift load 1) controls the high EQ of Deck 1, otherwise the master gain
+NumarkMixtrackGo.mainLevelPot = new components.Pot({
+    masterGroup: "[Master]",
+    eqGroup: "[EqualizerRack1_[Channel1]_Effect1]",
+    newValue: 0,
+
+    input: function(_channel, _control, value) {
+        this.newValue = Math.round(script.absoluteLin(value, 0, 1, 0, 127) * 100) / 100;
+
+        if (filterLowSwitch === 1) {
+            // High EQ Deck 1
+            engine.setParameter(this.eqGroup, "parameter3", this.newValue);
+        } else {
+            // Master gain - the pot range of the control is 0..1
+            engine.setValue(this.masterGroup, "gain", this.newValue);
+        }
+    },
+});
+
+// in EQ mode (shift load 1) controls the high EQ of Deck 2, otherwise the headphone gain
+NumarkMixtrackGo.cueLevelPot = new components.Pot({
+    masterGroup: "[Master]",
+    eqGroup: "[EqualizerRack1_[Channel2]_Effect1]",
+    newValue: 0,
+
+    input: function(_channel, _control, value) {
+        this.newValue = Math.round(script.absoluteLin(value, 0, 1, 0, 127) * 100) / 100;
+
+        if (filterLowSwitch === 1) {
+            // High EQ Deck 2
+            engine.setParameter(this.eqGroup, "parameter3", this.newValue);
+        } else {
+            // Headphone gain - the pot range of the control is 0..1
+            engine.setValue(this.masterGroup, "headGain", this.newValue);
+        }
+    },
+});
+
 NumarkMixtrackGo.Deck = function(deckIndex, deckNumber) {
     components.Deck.call(this, deckNumber);
     const group = `[Channel${deckNumber}]`;
@@ -1289,6 +1327,24 @@ NumarkMixtrackGo.Deck = function(deckIndex, deckNumber) {
                     this.parameter1StoredValue = this.newValue;
                     engine.setParameter(this.lowEqGroup, "parameter1", this.newValue);
                 }
+            }
+        },
+    });
+
+    this.levelPot = new components.Pot({
+        channelGroup: group,
+        eqGroup: `[EqualizerRack1_[Channel${deckNumber}]_Effect1]`,
+        newValue: 0,
+
+        input: function(_channel, _control, value) {
+            this.newValue = Math.round(script.absoluteLin(value, 0, 1, 0, 127) * 100) / 100;
+
+            if (filterLowSwitch === 1) {
+                // Mid EQ
+                engine.setParameter(this.eqGroup, "parameter2", this.newValue);
+            } else {
+                // Volume
+                engine.setValue(this.channelGroup, "volume", this.newValue);
             }
         },
     });

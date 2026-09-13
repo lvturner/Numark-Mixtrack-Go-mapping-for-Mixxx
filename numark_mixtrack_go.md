@@ -62,7 +62,7 @@ This controller has a built-in 4 channel output sound card, with a stereo Main o
   - Each button loads a track to the Deck on their side.
 * - **-**
   - {hwlabel}`SHIFT` + {hwlabel}`LOAD 1`
-  - Switches the filter/low knobs between controlling the Low EQ and the Filter (or any other) Effect.
+  - Switches the mixer knobs between two modes: Filter mode ({hwlabel}`FILTER/LOW` → Quick Effect, {hwlabel}`LEVEL` → Volume, {hwlabel}`MAIN LEVEL` → Master Gain, {hwlabel}`CUE LEVEL` → Headphone Gain) and EQ mode ({hwlabel}`FILTER/LOW` → Low EQ, {hwlabel}`LEVEL` → Mid EQ, {hwlabel}`MAIN LEVEL` → High EQ of Deck 1, {hwlabel}`CUE LEVEL` → High EQ of Deck 2).
 * - **-**
   - {hwlabel}`SHIFT` + {hwlabel}`LOAD 2`
   - Toggles the Vinyl mode in the Jogwheel.
@@ -71,13 +71,13 @@ This controller has a built-in 4 channel output sound card, with a stereo Main o
   - There is currently no functionality for this LED in Mixxx.
 * - **4**
   - {hwlabel}`MAIN LEVEL`
-  - Controls the Main Output Gain.
+  - Controls the Main Output Gain. In EQ mode ({hwlabel}`SHIFT` + {hwlabel}`LOAD 1`), controls the High EQ of Deck 1.
 * - **5**
   - {hwlabel}`CUE LEVEL`
-  - Controls the Headphone Gain.
+  - Controls the Headphone Gain. In EQ mode ({hwlabel}`SHIFT` + {hwlabel}`LOAD 1`), controls the High EQ of Deck 2.
 * - **6**
   - {hwlabel}`LEVEL`
-  - Controls each channel's Volume.
+  - Controls each channel's Volume. In EQ mode ({hwlabel}`SHIFT` + {hwlabel}`LOAD 1`), controls the Mid EQ.
 * - **7**
   - {hwlabel}`FILTER/LOW`
   - Controls the Quick Effect currently selected for that channel, or the Low EQ. Use {hwlabel}`SHIFT` + {hwlabel}`LOAD 1` to switch between the Effect and Low EQ. Select the Effect in the Mixxx graphical interface.
