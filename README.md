@@ -57,7 +57,7 @@ This controller has a built-in 4 channel output sound card, with a stereo Main o
 | Number | Control        | Function |
 | ------ | --------       | -------- |
 | 1      | Browser        | A knob for browsing the Library. If pushed, loads a track on the Preview Deck. |
-| 2      | Load           | Each button loads a track to the Deck on their side. |
+| 2      | Load           | Each button loads a track to the Deck on their side. The button LED stays on while in EQ mode (Shift + Load 1). |
 | -      | Shift Load1    | Switches the mixer knobs between two modes: Filter mode (Filter/Low → Quick Effect, Level → Volume, Main Level → Master Gain, Cue Level → Headphone Gain) and EQ mode (Filter/Low → Low EQ, Level → Mid EQ, Main Level → High EQ of Deck 1, Cue Level → High EQ of Deck 2). |
 | -      | Shift Load2    | Toggles the Vinyl mode in the Jogwheel. |
 | 3      | Bluetooth      | There is currently no functionality for this LED in Mixxx. |

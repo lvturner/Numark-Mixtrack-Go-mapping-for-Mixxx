@@ -59,7 +59,7 @@ This controller has a built-in 4 channel output sound card, with a stereo Main o
   - A knob for browsing the Library. If pushed, loads a track on the Preview Deck.
 * - **2**
   - {hwlabel}`LOAD`
-  - Each button loads a track to the Deck on their side.
+  - Each button loads a track to the Deck on their side. The button LED stays on while in EQ mode ({hwlabel}`SHIFT` + {hwlabel}`LOAD 1`).
 * - **-**
   - {hwlabel}`SHIFT` + {hwlabel}`LOAD 1`
   - Switches the mixer knobs between two modes: Filter mode ({hwlabel}`FILTER/LOW` → Quick Effect, {hwlabel}`LEVEL` → Volume, {hwlabel}`MAIN LEVEL` → Master Gain, {hwlabel}`CUE LEVEL` → Headphone Gain) and EQ mode ({hwlabel}`FILTER/LOW` → Low EQ, {hwlabel}`LEVEL` → Mid EQ, {hwlabel}`MAIN LEVEL` → High EQ of Deck 1, {hwlabel}`CUE LEVEL` → High EQ of Deck 2).
