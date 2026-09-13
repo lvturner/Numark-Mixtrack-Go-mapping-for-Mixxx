@@ -36,7 +36,7 @@ This controller has a built-in 4 channel output sound card, with a stereo Main o
 
 - The Numark Mixtrack Go's layout has 3 sections:
   - The middle holds the mixer related controls, library browsing and track loading controls.
-  - On each side there is a deck control area, where in Mixxx the left deck control will control Deck 1 and the right deck will control Deck 2.
+  - On each side there is a deck control area, where in Mixxx the left deck control will control Deck 1 and the right deck will control Deck 2. Each side can be switched to control the other deck of its pair (left: Deck 1 or 3, right: Deck 2 or 4) by holding the {hwlabel}`HEADPHONE` button and pressing {hwlabel}`PAD 1` on the left or {hwlabel}`PAD 2` on the right.
   - Both decks have essentially the same controls each. What differs is that the left side also has the connector to the Main Output and on the right side there's both a USB-C plug and Headphones connector.
 
 ![alt text](../../_static/controllers/numark_mixtrack_go_full.svg "Title")
@@ -71,19 +71,19 @@ This controller has a built-in 4 channel output sound card, with a stereo Main o
   - There is currently no functionality for this LED in Mixxx.
 * - **4**
   - {hwlabel}`MAIN LEVEL`
-  - Controls the Main Output Gain. In EQ mode (both {hwlabel}`LOAD` buttons), controls the High EQ of Deck 1.
+  - Controls the Main Output Gain. In EQ mode (both {hwlabel}`LOAD` buttons), controls the High EQ of the left deck (Deck 1 or 3).
 * - **5**
   - {hwlabel}`CUE LEVEL`
-  - Controls the Headphone Gain. In EQ mode (both {hwlabel}`LOAD` buttons), controls the High EQ of Deck 2.
+  - Controls the Headphone Gain. In EQ mode (both {hwlabel}`LOAD` buttons), controls the High EQ of the right deck (Deck 2 or 4).
 * - **6**
   - {hwlabel}`LEVEL`
-  - Controls each channel's Volume. In EQ mode (both {hwlabel}`LOAD` buttons), controls the Mid EQ.
+  - Controls each channel's Volume. In EQ mode (both {hwlabel}`LOAD` buttons), controls the Mid EQ of the deck on that side (Deck 1 or 3 on the left, Deck 2 or 4 on the right).
 * - **7**
   - {hwlabel}`FILTER/LOW`
   - Controls the Quick Effect currently selected for that channel, or the Low EQ. Outside of EQ mode, use {hwlabel}`SHIFT` + {hwlabel}`LOAD 1` to switch between the Effect and Low EQ. In EQ mode (both {hwlabel}`LOAD` buttons), always controls the Low EQ. Select the Effect in the Mixxx graphical interface.
 * - **8**
   - {hwlabel}`HEADPHONE`
-  - Sends that channel's audio through the Headphone Output.
+  - Sends that channel's audio through the Headphone Output. Hold this button and press {hwlabel}`PAD 1` (left side) or {hwlabel}`PAD 2` (right side) to switch that side's deck between its pair: Deck 1 <-> 3 and Deck 2 <-> 4. The pads, jogwheel and the mixer knobs then control the other deck. Pressing {hwlabel}`PAD 1` or {hwlabel}`PAD 2` while holding the {hwlabel}`HEADPHONE` button resets the pad mode to Hotcue.
 * - **9**
   - {hwlabel}`FADE FX`
   - This button toggles the Fade FX feature in Mixxx. When Fade FX is active, moving the Crossfader away from the current deck will activate the Quick Effect of that deck. When inactive, the Crossfader will work normally.

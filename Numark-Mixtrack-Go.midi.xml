@@ -339,82 +339,82 @@
       </control>
       <control>
         <group>[Channel1]</group>
-        <key>sync_enabled</key>
+        <key>NumarkMixtrackGo.leftDeck.syncButton.input</key>
         <description>sync</description>
         <status>0x90</status>
         <midino>0x02</midino>
         <options>
-          <normal/>
+          <script-binding/>
         </options>
       </control>
       <control>
         <group>[Channel1]</group>
-        <key>sync_enabled</key>
+        <key>NumarkMixtrackGo.leftDeck.syncButton.input</key>
         <description>sync</description>
         <status>0x80</status>
         <midino>0x02</midino>
         <options>
-          <normal/>
+          <script-binding/>
         </options>
       </control>
       <control>
         <group>[Channel2]</group>
-        <key>sync_enabled</key>
+        <key>NumarkMixtrackGo.rightDeck.syncButton.input</key>
         <description>sync</description>
         <status>0x91</status>
         <midino>0x02</midino>
         <options>
-          <normal/>
+          <script-binding/>
         </options>
       </control>
       <control>
         <group>[Channel2]</group>
-        <key>sync_enabled</key>
+        <key>NumarkMixtrackGo.rightDeck.syncButton.input</key>
         <description>sync</description>
         <status>0x81</status>
         <midino>0x02</midino>
         <options>
-          <normal/>
+          <script-binding/>
         </options>
       </control>
       <control>
         <group>[Channel1]</group>
-        <key>cue_default</key>
+        <key>NumarkMixtrackGo.leftDeck.cueButton.input</key>
         <description>cue</description>
         <status>0x90</status>
         <midino>0x01</midino>
         <options>
-          <normal/>
+          <script-binding/>
         </options>
       </control>
       <control>
         <group>[Channel1]</group>
-        <key>cue_default</key>
+        <key>NumarkMixtrackGo.leftDeck.cueButton.input</key>
         <description>cue</description>
         <status>0x80</status>
         <midino>0x01</midino>
         <options>
-          <normal/>
+          <script-binding/>
         </options>
       </control>
       <control>
         <group>[Channel2]</group>
-        <key>cue_default</key>
+        <key>NumarkMixtrackGo.rightDeck.cueButton.input</key>
         <description>cue</description>
         <status>0x91</status>
         <midino>0x01</midino>
         <options>
-          <normal/>
+          <script-binding/>
         </options>
       </control>
       <control>
         <group>[Channel2]</group>
-        <key>cue_default</key>
+        <key>NumarkMixtrackGo.rightDeck.cueButton.input</key>
         <description>cue</description>
         <status>0x81</status>
         <midino>0x01</midino>
         <options>
-          <normal/>
+          <script-binding/>
         </options>
       </control>
       <control>
@@ -439,42 +439,42 @@
       </control>
       <control>
         <group>[Channel1]</group>
-        <key>play</key>
+        <key>NumarkMixtrackGo.leftDeck.playButton.input</key>
         <description>play</description>
         <status>0x90</status>
         <midino>0x00</midino>
         <options>
-          <normal/>
+          <script-binding/>
         </options>
       </control>
       <control>
         <group>[Channel1]</group>
-        <key>play</key>
+        <key>NumarkMixtrackGo.leftDeck.playButton.input</key>
         <description>play</description>
         <status>0x80</status>
         <midino>0x00</midino>
         <options>
-          <normal/>
+          <script-binding/>
         </options>
       </control>
       <control>
         <group>[Channel2]</group>
-        <key>play</key>
+        <key>NumarkMixtrackGo.rightDeck.playButton.input</key>
         <description>play</description>
         <status>0x91</status>
         <midino>0x00</midino>
         <options>
-          <normal/>
+          <script-binding/>
         </options>
       </control>
       <control>
         <group>[Channel2]</group>
-        <key>play</key>
+        <key>NumarkMixtrackGo.rightDeck.playButton.input</key>
         <description>play</description>
         <status>0x81</status>
         <midino>0x00</midino>
         <options>
-          <normal/>
+          <script-binding/>
         </options>
       </control>
       <control>

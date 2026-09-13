@@ -840,7 +840,7 @@ const loadButtonCombo = function(side) {
         leftLoadPending = true;
         leftLoadTimerId = engine.beginTimer(loadComboWindowMs, () => {
             if (leftLoadPending) {
-                engine.setValue("[Channel1]", "LoadSelectedTrack", 1);
+                engine.setValue(`[Channel${NumarkMixtrackGo.leftDeck.deckNumber}]`, "LoadSelectedTrack", 1);
                 leftLoadPending = false;
             }
         }, true);
@@ -855,7 +855,7 @@ const loadButtonCombo = function(side) {
         rightLoadPending = true;
         rightLoadTimerId = engine.beginTimer(loadComboWindowMs, () => {
             if (rightLoadPending) {
-                engine.setValue("[Channel2]", "LoadSelectedTrack", 1);
+                engine.setValue(`[Channel${NumarkMixtrackGo.rightDeck.deckNumber}]`, "LoadSelectedTrack", 1);
                 rightLoadPending = false;
             }
         }, true);
@@ -891,7 +891,7 @@ NumarkMixtrackGo.vinylModeSwitcher = new components.Button({
     },
 });
 
-// in EQ mode (both load buttons) controls the high EQ of Deck 1, otherwise the master gain
+// in EQ mode (both load buttons) controls the high EQ of the left deck, otherwise the master gain
 NumarkMixtrackGo.mainLevelPot = new components.Pot({
     masterGroup: "[Master]",
     eqGroup: "[EqualizerRack1_[Channel1]_Effect1]",
@@ -901,7 +901,8 @@ NumarkMixtrackGo.mainLevelPot = new components.Pot({
         this.newValue = Math.round(script.absoluteLin(value, 0, 1, 0, 127) * 100) / 100;
 
         if (levelsSwitch === 1) {
-            // High EQ Deck 1
+            // High EQ of the left deck (follows it when switched to Channel 3)
+            this.eqGroup = `[EqualizerRack1_[Channel${NumarkMixtrackGo.leftDeck.deckNumber}]_Effect1]`;
             engine.setParameter(this.eqGroup, "parameter3", this.newValue);
         } else {
             // Master gain - the pot range of the control is 0..1
@@ -910,7 +911,7 @@ NumarkMixtrackGo.mainLevelPot = new components.Pot({
     },
 });
 
-// in EQ mode (both load buttons) controls the high EQ of Deck 2, otherwise the headphone gain
+// in EQ mode (both load buttons) controls the high EQ of the right deck, otherwise the headphone gain
 NumarkMixtrackGo.cueLevelPot = new components.Pot({
     masterGroup: "[Master]",
     eqGroup: "[EqualizerRack1_[Channel2]_Effect1]",
@@ -920,7 +921,8 @@ NumarkMixtrackGo.cueLevelPot = new components.Pot({
         this.newValue = Math.round(script.absoluteLin(value, 0, 1, 0, 127) * 100) / 100;
 
         if (levelsSwitch === 1) {
-            // High EQ Deck 2
+            // High EQ of the right deck (follows it when switched to Channel 4)
+            this.eqGroup = `[EqualizerRack1_[Channel${NumarkMixtrackGo.rightDeck.deckNumber}]_Effect1]`;
             engine.setParameter(this.eqGroup, "parameter3", this.newValue);
         } else {
             // Headphone gain - the pot range of the control is 0..1
@@ -933,11 +935,46 @@ NumarkMixtrackGo.Deck = function(deckIndex, deckNumber) {
     components.Deck.call(this, deckNumber);
     const group = `[Channel${deckNumber}]`;
 
+    // identity and deck switching state - a deck can control channel 1 or 3 (left)
+    // or 2 or 4 (right), toggled by holding the Headphone button and pressing a pad
+    this.deckIndex = deckIndex;
+    this.deckNumber = deckNumber;
+    this.padPressed = [false, false, false, false];
+    this.pflPressed = false;
+    const deckSelf = this;
+    const switchPadIndex = deckIndex === 0 ? 0 : 1; // left uses Pad 1, right uses Pad 2
+
+    // track every engine connection so they can be disconnected when the deck is
+    // switched to another channel (the connections are fixed to a channel at creation)
+    let connections = [];
+    const makeConn = function(g, c, cb) {
+        const conn = engine.makeConnection(g, c, cb);
+        connections.push(conn);
+        return conn;
+    };
+    this.connections = connections;
+    this.disconnectAll = function() {
+        connections.forEach(function(conn) {
+            conn.disconnect();
+        });
+    };
+
+    // switches this deck between its two channels (left: 1<->3, right: 2<->4)
+    this.switchToOtherDeck = function() {
+        this.disconnectAll();
+        NumarkMixtrackGo.led.setAllPadsOff(deckIndex);
+        NumarkMixtrackGo.led.setAllPadsShiftOff(deckIndex);
+        const newDeckNumber = this.deckNumber <= 2 ? this.deckNumber + 2 : this.deckNumber - 2;
+        const globalName = this.deckIndex === 0 ? "leftDeck" : "rightDeck";
+        NumarkMixtrackGo[globalName] = new NumarkMixtrackGo.Deck(this.deckIndex, newDeckNumber);
+        NumarkMixtrackGo[globalName].setDeckStartLeds();
+    };
+
     const padModesNumber = padModes.length;
     let currentPadMode = 0;
 
     // pfl status led control
-    const pflConnection = engine.makeConnection(group, "pfl", function() {
+    const pflConnection = makeConn(group, "pfl", function() {
         if (engine.getValue(group, "pfl") === 1) {
             NumarkMixtrackGo.led.setPflBright(deckIndex);
         } else {
@@ -956,7 +993,7 @@ NumarkMixtrackGo.Deck = function(deckIndex, deckNumber) {
         }
     };
 
-    const loadConnection = engine.makeConnection(group, "track_loaded", function() {
+    const loadConnection = makeConn(group, "track_loaded", function() {
         NumarkMixtrackGo.leftDeck.updateLoadLed();
         NumarkMixtrackGo.rightDeck.updateLoadLed();
     });
@@ -965,7 +1002,7 @@ NumarkMixtrackGo.Deck = function(deckIndex, deckNumber) {
     this.hotcueConnections = [];
     for (let i = 1; i <= 4; i++) {
         const hotcueStatusControl = `hotcue_${i}_status`;
-        this.hotcueConnections[i] = engine.makeConnection(group, hotcueStatusControl, function() {
+        this.hotcueConnections[i] = makeConn(group, hotcueStatusControl, function() {
             if (currentPadMode === 0) {
                 const hotCueStatus = engine.getValue(group, hotcueStatusControl);
                 if (hotCueStatus === 0) {
@@ -981,7 +1018,7 @@ NumarkMixtrackGo.Deck = function(deckIndex, deckNumber) {
 
     // pads beat loop led control
     for (let i = 1; i <= 4; i++) {
-        engine.makeConnection("[App]", "indicator_500ms", function() {
+        makeConn("[App]", "indicator_500ms", function() {
             if (currentPadMode === 1) {
                 if (engine.getValue(group, `beatloop_${beatloopPadSizes[i-1]}_enabled`) === 1) {
                     if (engine.getValue("[App]", "indicator_500ms") === 1) {
@@ -1000,7 +1037,7 @@ NumarkMixtrackGo.Deck = function(deckIndex, deckNumber) {
     for (let i = 1; i <= 3; i++) {
         const effectRackEffectUnitGroup = `[EffectRack1_EffectUnit${i}]`;
         const effectEnableControl = `group_${group}_enable`;
-        engine.makeConnection(effectRackEffectUnitGroup, effectEnableControl, function() {
+        makeConn(effectRackEffectUnitGroup, effectEnableControl, function() {
             if (engine.getValue(effectRackEffectUnitGroup, effectEnableControl) === 1) {
                 NumarkMixtrackGo.led.setPadBright(i, deckIndex);
             } else {
@@ -1009,7 +1046,7 @@ NumarkMixtrackGo.Deck = function(deckIndex, deckNumber) {
         });
     }
     // pad 4 fx mode led control
-    engine.makeConnection(group, beatloopRollControl, function() {
+    makeConn(group, beatloopRollControl, function() {
         if (engine.getValue(group, beatloopRollControl) === 1) {
             NumarkMixtrackGo.led.setPadBright(4, deckIndex);
         } else {
@@ -1020,7 +1057,7 @@ NumarkMixtrackGo.Deck = function(deckIndex, deckNumber) {
     // sampler pad loaded and playing led control
     for (let i = 1; i <= 4; i++) {
         const samplerGroup = `[Sampler${i}]`;
-        engine.makeConnection(samplerGroup, "track_loaded", function() {
+        makeConn(samplerGroup, "track_loaded", function() {
             if (currentPadMode === 3) {
                 if (engine.getValue(samplerGroup, "track_loaded") === 1) {
                     NumarkMixtrackGo.led.setPadBright(i, deckIndex);
@@ -1031,7 +1068,7 @@ NumarkMixtrackGo.Deck = function(deckIndex, deckNumber) {
                 }
             }
         });
-        engine.makeConnection("[App]", "indicator_500ms", function() {
+        makeConn("[App]", "indicator_500ms", function() {
             if (currentPadMode === 3) {
                 if (engine.getValue(samplerGroup, "track_loaded") === 1) {
                     if (engine.getValue(samplerGroup, "play_indicator") === 1) {
@@ -1049,7 +1086,7 @@ NumarkMixtrackGo.Deck = function(deckIndex, deckNumber) {
     }
 
     // sync led control
-    const syncConnection = engine.makeConnection(group, "sync_enabled", function() {
+    const syncConnection = makeConn(group, "sync_enabled", function() {
         const syncIndicatorState = engine.getValue(group, "sync_enabled");
         if (syncIndicatorState === 0) {
             NumarkMixtrackGo.led.setSyncDim(deckIndex);
@@ -1059,7 +1096,7 @@ NumarkMixtrackGo.Deck = function(deckIndex, deckNumber) {
     });
 
     // cue led control
-    const cueConnection = engine.makeConnection(group, "cue_indicator", function() {
+    const cueConnection = makeConn(group, "cue_indicator", function() {
         const cueIndicatorState = engine.getValue(group, "cue_indicator");
         if (cueIndicatorState === 0) {
             NumarkMixtrackGo.led.setCueDim(deckIndex);
@@ -1071,7 +1108,7 @@ NumarkMixtrackGo.Deck = function(deckIndex, deckNumber) {
     });
 
     // play led control
-    engine.makeConnection(group, "play_indicator", function() {
+    makeConn(group, "play_indicator", function() {
         if (engine.getValue(group, "play_indicator") === 1) {
             NumarkMixtrackGo.led.setPlayBright(deckIndex);
         } else {
@@ -1080,7 +1117,7 @@ NumarkMixtrackGo.Deck = function(deckIndex, deckNumber) {
     });
 
     // set play led default state
-    const playConnection = engine.makeConnection(group, "play", function() {
+    const playConnection = makeConn(group, "play", function() {
         if (engine.getValue(group, "play")=== 0) {
             NumarkMixtrackGo.led.setPlayDim(deckIndex);
             //if play stops and fade fx is on, the effects need to be reset (same on serato)
@@ -1091,7 +1128,7 @@ NumarkMixtrackGo.Deck = function(deckIndex, deckNumber) {
         }
     });
 
-    const playAndCueShiftTrackLoadedConnection = engine.makeConnection(group, "track_loaded", function() {
+    const playAndCueShiftTrackLoadedConnection = makeConn(group, "track_loaded", function() {
         const loadedState = engine.getValue(group, "track_loaded");
         if (loadedState === 0) {
             NumarkMixtrackGo.led.setCueShiftDim(deckIndex);
@@ -1136,7 +1173,7 @@ NumarkMixtrackGo.Deck = function(deckIndex, deckNumber) {
 
     let isStemsTrackLoaded = false;
 
-    const stemsStateConnection = engine.makeConnection(group, "stem_count", function() {
+    const stemsStateConnection = makeConn(group, "stem_count", function() {
         if (engine.getValue(group, "stem_count") > 0) {
             isStemsTrackLoaded = true;
             setAllStemPadLeds();
@@ -1173,7 +1210,7 @@ NumarkMixtrackGo.Deck = function(deckIndex, deckNumber) {
         }
     };
 
-    engine.makeConnection(drumsStemGroup, "mute", function() {
+    makeConn(drumsStemGroup, "mute", function() {
         if (isStemsTrackLoaded) {
             if (engine.getValue(drumsStemGroup, "mute") === 1) {
                 NumarkMixtrackGo.led.setPad1Off(deckIndex);
@@ -1183,7 +1220,7 @@ NumarkMixtrackGo.Deck = function(deckIndex, deckNumber) {
             setAcapelAndInstruLed();
         }
     });
-    engine.makeConnection(bassStemGroup, "mute", function() {
+    makeConn(bassStemGroup, "mute", function() {
         if (isStemsTrackLoaded) {
             if (engine.getValue(bassStemGroup, "mute") === 1) {
                 NumarkMixtrackGo.led.setPad2Off(deckIndex);
@@ -1193,7 +1230,7 @@ NumarkMixtrackGo.Deck = function(deckIndex, deckNumber) {
             setAcapelAndInstruLed();
         }
     });
-    engine.makeConnection(synthsStemGroup, "mute", function() {
+    makeConn(synthsStemGroup, "mute", function() {
         if (isStemsTrackLoaded) {
             if (engine.getValue(synthsStemGroup, "mute") === 1) {
                 NumarkMixtrackGo.led.setPad3Off(deckIndex);
@@ -1203,7 +1240,7 @@ NumarkMixtrackGo.Deck = function(deckIndex, deckNumber) {
             setAcapelAndInstruLed();
         }
     });
-    engine.makeConnection(voiceStemGroup, "mute", function() {
+    makeConn(voiceStemGroup, "mute", function() {
         if (isStemsTrackLoaded) {
             if (engine.getValue(voiceStemGroup, "mute") === 1) {
                 NumarkMixtrackGo.led.setPad4Off(deckIndex);
@@ -1411,15 +1448,44 @@ NumarkMixtrackGo.Deck = function(deckIndex, deckNumber) {
         },
     });
 
+    // play/cue/sync are script-bound so they follow the deck when it is switched to
+    // another channel (the previous plain bindings always targeted the default channel)
+    this.playButton = new components.Button({
+        input: function(_channel, _control, value) {
+            engine.setValue(group, "play", value);
+        }
+    });
+
+    this.cueButton = new components.Button({
+        input: function(_channel, _control, value) {
+            engine.setValue(group, "cue_default", value);
+        }
+    });
+
+    this.syncButton = new components.Button({
+        input: function(_channel, _control, value) {
+            engine.setValue(group, "sync_enabled", value);
+        }
+    });
+
     this.pflButton = new components.Button({
-        input: function(_channel, _control, value, _status, group) {
+        input: function(_channel, _control, value, _status, _group) {
             if (value === 127) {
+                deckSelf.pflPressed = true;
+                // holding the Headphone button and pressing the side's switch pad toggles
+                // this deck to the other channel - order independent (pad can be held first)
+                if (deckSelf.padPressed[switchPadIndex]) {
+                    deckSelf.switchToOtherDeck();
+                    return;
+                }
                 script.toggleControl(group, "pfl");
                 if (engine.getValue(group, "pfl") === 1) {
                     NumarkMixtrackGo.led.setPflBright(deckIndex);
                 } else {
                     NumarkMixtrackGo.led.setPflDim(deckIndex);
                 }
+            } else {
+                deckSelf.pflPressed = false;
             }
         }
     });
@@ -1512,6 +1578,14 @@ NumarkMixtrackGo.Deck = function(deckIndex, deckNumber) {
             stemGroup: `[Channel${deckNumber}_Stem${(i+1)}]`,
 
             input: function(_channel, control, value) {
+                deckSelf.padPressed[this.padNumber - 1] = value === 127;
+                // holding the Headphone button and pressing this side's switch pad
+                // toggles the deck to the other channel (consume the pad press so it
+                // does not also trigger a hotcue/loop/sample)
+                if (value === 127 && deckSelf.pflPressed && this.padNumber === switchPadIndex + 1) {
+                    deckSelf.switchToOtherDeck();
+                    return;
+                }
                 switch (currentPadMode) {
                 case 0: // hotcue
                     if (value === 127) {
