@@ -1380,11 +1380,12 @@ NumarkMixtrackGo.Deck = function(deckIndex, deckNumber) {
         input: function(_channel, _control, value) {
             this.newValue = Math.round(script.absoluteLin(value, 0, 1, 0, 127) * 100) / 100;
 
-            if (filterLowSwitch === 0) {
-                // Filter - since this will use QuickEffectRack1, the effect is whatever the user has set
+            if (levelsSwitch === 0 && filterLowSwitch === 0) {
+                // Filter - only when not in EQ mode and the filter/low switch is set to filter.
+                // Since this will use QuickEffectRack1, the effect is whatever the user has set
                 engine.setValue(this.quickEffectRackGroup, "super1", this.newValue);
             } else {
-                // Low
+                // Low - always used in EQ mode, otherwise when the filter/low switch is set to low
                 // warning [Main] "EffectParameter(Low)" WARNING: Value was outside of limits, clamped.
                 // getting this warning when script.absoluteLin returns 1
                 engine.setParameter(this.lowEqGroup, "parameter1", this.newValue);

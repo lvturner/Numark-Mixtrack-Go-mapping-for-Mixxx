@@ -64,7 +64,7 @@ This controller has a built-in 4 channel output sound card, with a stereo Main o
 | 4      | Main Level     | Controls the Main Output Gain. In EQ mode (both Load buttons), controls the High EQ of Deck 1. |
 | 5      | Cue Level      | Controls the Headphone Gain. In EQ mode (both Load buttons), controls the High EQ of Deck 2. |
 | 6      | Level          | Controls each channel's Volume. In EQ mode (both Load buttons), controls the Mid EQ. |
-| 7      | Filter/Low     | Controls the Quick Effect currently selected for that channel, or the Low EQ. Use Shift + Load 1 to switch between the Effect and Low EQ. Select the Effect in the Mixxx graphical interface. |
+| 7      | Filter/Low     | Controls the Quick Effect currently selected for that channel, or the Low EQ. Outside of EQ mode, use Shift + Load 1 to switch between the Effect and Low EQ. In EQ mode (both Load buttons), always controls the Low EQ. Select the Effect in the Mixxx graphical interface. |
 | 8      | Headphone      | Sends that channel's audio through the Headphone Output. |
 | 9      | Fade FX        | This button toggles the Fade FX feature in Mixxx. When Fade FX is active, moving the Crossfader away from the current deck will activate the Quick Effect of that deck. When inactive, the Crossfader will work normally. |
 | 10      | Crossfader    | Fades between the Left and the Right channel. |

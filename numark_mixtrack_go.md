@@ -80,7 +80,7 @@ This controller has a built-in 4 channel output sound card, with a stereo Main o
   - Controls each channel's Volume. In EQ mode (both {hwlabel}`LOAD` buttons), controls the Mid EQ.
 * - **7**
   - {hwlabel}`FILTER/LOW`
-  - Controls the Quick Effect currently selected for that channel, or the Low EQ. Use {hwlabel}`SHIFT` + {hwlabel}`LOAD 1` to switch between the Effect and Low EQ. Select the Effect in the Mixxx graphical interface.
+  - Controls the Quick Effect currently selected for that channel, or the Low EQ. Outside of EQ mode, use {hwlabel}`SHIFT` + {hwlabel}`LOAD 1` to switch between the Effect and Low EQ. In EQ mode (both {hwlabel}`LOAD` buttons), always controls the Low EQ. Select the Effect in the Mixxx graphical interface.
 * - **8**
   - {hwlabel}`HEADPHONE`
   - Sends that channel's audio through the Headphone Output.
