@@ -637,6 +637,9 @@ NumarkMixtrackGo.init = function() {
     midi.sendSysexMsg(IdentityRequestSysex, IdentityRequestSysex.length);
 
     this.deck = new components.ComponentContainer();
+    // tracks whether a deck switch was triggered by a Headphone + Pad combo, so the
+    // release event (which arrives on the newly created deck) skips the cue toggle
+    NumarkMixtrackGo.pflSwitchFired = [false, false];
     NumarkMixtrackGo.leftDeck = new NumarkMixtrackGo.Deck(0, 1);
     NumarkMixtrackGo.rightDeck = new NumarkMixtrackGo.Deck(1, 2);
 
@@ -939,6 +942,7 @@ NumarkMixtrackGo.Deck = function(deckIndex, deckNumber) {
     // or 2 or 4 (right), toggled by holding the Headphone button and pressing a pad
     this.deckIndex = deckIndex;
     this.deckNumber = deckNumber;
+    this.isSecondary = deckNumber > 2; // left: 3, right: 4
     this.padPressed = [false, false, false, false];
     this.pflPressed = false;
     const deckSelf = this;
@@ -1255,6 +1259,54 @@ NumarkMixtrackGo.Deck = function(deckIndex, deckNumber) {
         }
     });
 
+    // references the pad-mode led that is lit for the current pad mode, so it can be
+    // flashed as the "deck is on its secondary channel" indicator
+    const setActiveModeLed = function(bright) {
+        switch (currentPadMode) {
+        case 0: // hotcue
+            if (bright) {
+                NumarkMixtrackGo.led.setModeHotcueBright(deckIndex);
+            } else {
+                NumarkMixtrackGo.led.setModeHotcueDim(deckIndex);
+            }
+            break;
+        case 1: // loops
+            if (bright) {
+                NumarkMixtrackGo.led.setModeLoopsBright(deckIndex);
+            } else {
+                NumarkMixtrackGo.led.setModeLoopsDim(deckIndex);
+            }
+            break;
+        case 2: // fx
+        case 3: // sampler
+            if (bright) {
+                NumarkMixtrackGo.led.setModeSamplerBright(deckIndex);
+            } else {
+                NumarkMixtrackGo.led.setModeSamplerDim(deckIndex);
+            }
+            break;
+        case 4: // stems
+            if (bright) {
+                NumarkMixtrackGo.led.setModeStemsBright(deckIndex);
+            } else {
+                NumarkMixtrackGo.led.setModeStemsDim(deckIndex);
+            }
+            break;
+        }
+    };
+
+    // flash the active pad-mode led while the deck is on its secondary channel
+    // (left: Deck 3, right: Deck 4)
+    makeConn("[App]", "indicator_500ms", function() {
+        if (deckSelf.isSecondary) {
+            if (engine.getValue("[App]", "indicator_500ms") === 1) {
+                setActiveModeLed(true);
+            } else {
+                setActiveModeLed(false);
+            }
+        }
+    });
+
     this.setDeckStartLeds = function() {
         pflConnection.trigger();
         NumarkMixtrackGo.led.setPflShiftDim(deckIndex); // shift pfl is always dim
@@ -1476,19 +1528,24 @@ NumarkMixtrackGo.Deck = function(deckIndex, deckNumber) {
         input: function(_channel, _control, value, _status, _group) {
             if (value === 127) {
                 deckSelf.pflPressed = true;
-                // holding the Headphone button and pressing the side's switch pad toggles
-                // this deck to the other channel - order independent (pad can be held first)
+                // switch pad already held -> order independent; the combo does not
+                // touch the headphone cue (it is toggled on release below)
                 if (deckSelf.padPressed[switchPadIndex]) {
+                    NumarkMixtrackGo.pflSwitchFired[deckIndex] = true;
                     deckSelf.switchToOtherDeck();
                     return;
                 }
-                script.toggleControl(group, "pfl");
-                if (engine.getValue(group, "pfl") === 1) {
-                    NumarkMixtrackGo.led.setPflBright(deckIndex);
-                } else {
-                    NumarkMixtrackGo.led.setPflDim(deckIndex);
-                }
             } else {
+                // toggle the cue on release, unless the press was used to switch decks
+                if (!NumarkMixtrackGo.pflSwitchFired[deckIndex]) {
+                    script.toggleControl(group, "pfl");
+                    if (engine.getValue(group, "pfl") === 1) {
+                        NumarkMixtrackGo.led.setPflBright(deckIndex);
+                    } else {
+                        NumarkMixtrackGo.led.setPflDim(deckIndex);
+                    }
+                }
+                NumarkMixtrackGo.pflSwitchFired[deckIndex] = false;
                 deckSelf.pflPressed = false;
             }
         }
@@ -1587,6 +1644,7 @@ NumarkMixtrackGo.Deck = function(deckIndex, deckNumber) {
                 // toggles the deck to the other channel (consume the pad press so it
                 // does not also trigger a hotcue/loop/sample)
                 if (value === 127 && deckSelf.pflPressed && this.padNumber === switchPadIndex + 1) {
+                    NumarkMixtrackGo.pflSwitchFired[deckIndex] = true;
                     deckSelf.switchToOtherDeck();
                     return;
                 }
