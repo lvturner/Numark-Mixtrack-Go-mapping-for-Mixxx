@@ -1536,7 +1536,7 @@ NumarkMixtrackGo.Deck = function(deckIndex, deckNumber) {
     });
 
     this.pflButton = new components.Button({
-        input: function(_channel, _control, value, _status, group) {
+        input: function(_channel, _control, value, _status, _group) {
             if (value === 127) {
                 deckSelf.pflPressed = true;
                 // switch pad already held -> order independent; the combo does not
