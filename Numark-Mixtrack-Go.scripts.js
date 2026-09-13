@@ -640,6 +640,9 @@ NumarkMixtrackGo.init = function() {
     // tracks whether a deck switch was triggered by a Headphone + Pad combo, so the
     // release event (which arrives on the newly created deck) skips the cue toggle
     NumarkMixtrackGo.pflSwitchFired = [false, false];
+    // remembers each side's switch pad (Pad 1 for the left, Pad 2 for the right) while
+    // a deck switch is in progress, so its release can flash a confirmation (0 = none)
+    NumarkMixtrackGo.padSwitchFired = [0, 0];
     NumarkMixtrackGo.leftDeck = new NumarkMixtrackGo.Deck(0, 1);
     NumarkMixtrackGo.rightDeck = new NumarkMixtrackGo.Deck(1, 2);
 
@@ -969,6 +972,8 @@ NumarkMixtrackGo.Deck = function(deckIndex, deckNumber) {
 
     // switches this deck between its two channels (left: 1<->3, right: 2<->4)
     this.switchToOtherDeck = function() {
+        // remember which pad started the switch so its release can flash a confirmation
+        NumarkMixtrackGo.padSwitchFired[deckIndex] = switchPadIndex + 1;
         this.disconnectAll();
         NumarkMixtrackGo.led.setAllPadsOff(deckIndex);
         NumarkMixtrackGo.led.setAllPadsShiftOff(deckIndex);
@@ -1336,6 +1341,12 @@ NumarkMixtrackGo.Deck = function(deckIndex, deckNumber) {
         NumarkMixtrackGo.led.setModeLoopsDim(deckIndex);
         NumarkMixtrackGo.led.setModeSamplerDim(deckIndex);
         NumarkMixtrackGo.led.setModeStemsDim(deckIndex);
+
+        // a deck switch keeps the switch pad lit while it is still held, so it can be
+        // flashed on release as confirmation
+        if (NumarkMixtrackGo.padSwitchFired[deckIndex] > 0) {
+            NumarkMixtrackGo.led.setPadBright(NumarkMixtrackGo.padSwitchFired[deckIndex], deckIndex);
+        }
     };
 
     // had to implement this because the midi learning tool's reverse wasn't working
@@ -1640,11 +1651,27 @@ NumarkMixtrackGo.Deck = function(deckIndex, deckNumber) {
 
             input: function(_channel, control, value) {
                 deckSelf.padPressed[this.padNumber - 1] = value === 127;
+                // releasing the pad that switched the deck flashes it briefly to confirm
+                // the change (it is recreated deck that receives this release event)
+                if (value !== 127 && NumarkMixtrackGo.padSwitchFired[deckIndex] === this.padNumber) {
+                    NumarkMixtrackGo.led.setPadBright(this.padNumber, deckIndex);
+                    engine.beginTimer(200, () => {
+                        if (engine.getValue(group, this.hotcueStatusControl) === 0) {
+                            NumarkMixtrackGo.led.setPadOff(this.padNumber, deckIndex);
+                            NumarkMixtrackGo.led.setPadShiftOff(this.padNumber, deckIndex);
+                        } else {
+                            NumarkMixtrackGo.led.setPadBright(this.padNumber, deckIndex);
+                            NumarkMixtrackGo.led.setPadShiftBright(this.padNumber, deckIndex);
+                        }
+                        NumarkMixtrackGo.padSwitchFired[deckIndex] = 0;
+                    }, true);
+                }
                 // holding the Headphone button and pressing this side's switch pad
                 // toggles the deck to the other channel (consume the pad press so it
                 // does not also trigger a hotcue/loop/sample)
                 if (value === 127 && deckSelf.pflPressed && this.padNumber === switchPadIndex + 1) {
                     NumarkMixtrackGo.pflSwitchFired[deckIndex] = true;
+                    NumarkMixtrackGo.led.setPadBright(this.padNumber, deckIndex); // light while touched
                     deckSelf.switchToOtherDeck();
                     return;
                 }
