@@ -799,6 +799,9 @@ NumarkMixtrackGo.filterLowSwitcher = new components.Button({
             } else {
                 filterLowSwitch = 0;
             }
+            // the load leds double as the EQ mode indicator
+            NumarkMixtrackGo.leftDeck.updateLoadLed();
+            NumarkMixtrackGo.rightDeck.updateLoadLed();
         }
     },
 });
@@ -870,14 +873,20 @@ NumarkMixtrackGo.Deck = function(deckIndex, deckNumber) {
         }
     });
 
-    // load status led control
-    const loadConnection = engine.makeConnection(group, "track_loaded", function() {
-
-        if (engine.getValue(group, "track_loaded") === 1) {
+    // load status led control - doubles as the EQ mode indicator (lit while in EQ mode)
+    this.updateLoadLed = function() {
+        if (filterLowSwitch === 1) {
+            NumarkMixtrackGo.led.setLoadBright(deckIndex);
+        } else if (engine.getValue(group, "track_loaded") === 1) {
             NumarkMixtrackGo.led.setLoadBright(deckIndex);
         } else {
             NumarkMixtrackGo.led.setLoadDim(deckIndex);
         }
+    };
+
+    const loadConnection = engine.makeConnection(group, "track_loaded", function() {
+        NumarkMixtrackGo.leftDeck.updateLoadLed();
+        NumarkMixtrackGo.rightDeck.updateLoadLed();
     });
 
     // hotcue status led controls
@@ -1294,39 +1303,19 @@ NumarkMixtrackGo.Deck = function(deckIndex, deckNumber) {
     this.filterLowPot = new components.Pot({
         quickEffectRackGroup: `[QuickEffectRack1_[Channel${deckNumber}]]`,
         lowEqGroup: `[EqualizerRack1_[Channel${deckNumber}]_Effect1]`,
-        super1StoredValue: 0,
-        parameter1StoredValue: 0,
         newValue: 0,
-        valueChange: 0,
 
         input: function(_channel, _control, value) {
             this.newValue = Math.round(script.absoluteLin(value, 0, 1, 0, 127) * 100) / 100;
-            this.valueChange = 0;
 
             if (filterLowSwitch === 0) {
                 // Filter - since this will use QuickEffectRack1, the effect is whatever the user has set
-                // Setting the filter programmatically is a bad idea because whatever is set, if it's parameters where modified,
-                // they'd be reset if filter was set programmatically and the sound could change drastically.
-                this.super1StoredValue = engine.getValue(this.quickEffectRackGroup, "super1");
-                this.valueChange = this.super1StoredValue - this.newValue;
-
-                // takeover at 2% distance
-                if ((this.valueChange < 0.02 && this.valueChange > -0.02)) {
-                    this.super1StoredValue = this.newValue;
-                    engine.setValue(this.quickEffectRackGroup, "super1", this.newValue);
-                }
+                engine.setValue(this.quickEffectRackGroup, "super1", this.newValue);
             } else {
                 // Low
                 // warning [Main] "EffectParameter(Low)" WARNING: Value was outside of limits, clamped.
                 // getting this warning when script.absoluteLin returns 1
-                this.parameter1StoredValue = engine.getParameter(this.lowEqGroup, "parameter1");
-                this.valueChange = this.parameter1StoredValue - this.newValue;
-
-                // takeover at 2% distance
-                if ((this.valueChange < 0.02 && this.valueChange > -0.02)) {
-                    this.parameter1StoredValue = this.newValue;
-                    engine.setParameter(this.lowEqGroup, "parameter1", this.newValue);
-                }
+                engine.setParameter(this.lowEqGroup, "parameter1", this.newValue);
             }
         },
     });
