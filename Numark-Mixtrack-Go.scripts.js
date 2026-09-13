@@ -612,8 +612,11 @@ let isFadeFxOn = false;
 // only used for it's length
 const padModes = ["hotcue", "loops", "fx", "sampler", "stems"];
 
-// 0 for filter, 1 for low
+// 0 for filter, 1 for low - toggled by Shift + Load 1
 let filterLowSwitch = 1;
+
+// 0 for levels (volume / gains), 1 for EQ mode (mid / high) - toggled by pressing both load buttons
+let levelsSwitch = 0;
 
 let vinylModeEnabled = true;
 
@@ -799,9 +802,78 @@ NumarkMixtrackGo.filterLowSwitcher = new components.Button({
             } else {
                 filterLowSwitch = 0;
             }
-            // the load leds double as the EQ mode indicator
-            NumarkMixtrackGo.leftDeck.updateLoadLed();
-            NumarkMixtrackGo.rightDeck.updateLoadLed();
+        }
+    },
+});
+
+// both load buttons pressed together toggle the level knobs between volume/gain (off)
+// and EQ mode (on, controlling mid/high). A single load press still loads a track,
+// delayed by the combo window so the two can be told apart.
+const loadComboWindowMs = 150;
+let leftLoadPressTime = 0;
+let rightLoadPressTime = 0;
+let leftLoadTimerId = 0;
+let rightLoadTimerId = 0;
+let leftLoadPending = false;
+let rightLoadPending = false;
+
+NumarkMixtrackGo.toggleLevelsSwitch = function() {
+    if (levelsSwitch === 0) {
+        levelsSwitch = 1;
+    } else {
+        levelsSwitch = 0;
+    }
+    NumarkMixtrackGo.leftDeck.updateLoadLed();
+    NumarkMixtrackGo.rightDeck.updateLoadLed();
+};
+
+const loadButtonCombo = function(side) {
+    const now = Date.now();
+    if (side === "left") {
+        if (rightLoadPending && (now - rightLoadPressTime) < loadComboWindowMs) {
+            engine.stopTimer(rightLoadTimerId);
+            rightLoadPending = false;
+            NumarkMixtrackGo.toggleLevelsSwitch();
+            return;
+        }
+        leftLoadPressTime = now;
+        leftLoadPending = true;
+        leftLoadTimerId = engine.beginTimer(loadComboWindowMs, () => {
+            if (leftLoadPending) {
+                engine.setValue("[Channel1]", "LoadSelectedTrack", 1);
+                leftLoadPending = false;
+            }
+        }, true);
+    } else {
+        if (leftLoadPending && (now - leftLoadPressTime) < loadComboWindowMs) {
+            engine.stopTimer(leftLoadTimerId);
+            leftLoadPending = false;
+            NumarkMixtrackGo.toggleLevelsSwitch();
+            return;
+        }
+        rightLoadPressTime = now;
+        rightLoadPending = true;
+        rightLoadTimerId = engine.beginTimer(loadComboWindowMs, () => {
+            if (rightLoadPending) {
+                engine.setValue("[Channel2]", "LoadSelectedTrack", 1);
+                rightLoadPending = false;
+            }
+        }, true);
+    }
+};
+
+NumarkMixtrackGo.leftLoad = new components.Button({
+    input: function(_channel, _control, value) {
+        if (value === 127) {
+            loadButtonCombo("left");
+        }
+    },
+});
+
+NumarkMixtrackGo.rightLoad = new components.Button({
+    input: function(_channel, _control, value) {
+        if (value === 127) {
+            loadButtonCombo("right");
         }
     },
 });
@@ -819,7 +891,7 @@ NumarkMixtrackGo.vinylModeSwitcher = new components.Button({
     },
 });
 
-// in EQ mode (shift load 1) controls the high EQ of Deck 1, otherwise the master gain
+// in EQ mode (both load buttons) controls the high EQ of Deck 1, otherwise the master gain
 NumarkMixtrackGo.mainLevelPot = new components.Pot({
     masterGroup: "[Master]",
     eqGroup: "[EqualizerRack1_[Channel1]_Effect1]",
@@ -828,7 +900,7 @@ NumarkMixtrackGo.mainLevelPot = new components.Pot({
     input: function(_channel, _control, value) {
         this.newValue = Math.round(script.absoluteLin(value, 0, 1, 0, 127) * 100) / 100;
 
-        if (filterLowSwitch === 1) {
+        if (levelsSwitch === 1) {
             // High EQ Deck 1
             engine.setParameter(this.eqGroup, "parameter3", this.newValue);
         } else {
@@ -838,7 +910,7 @@ NumarkMixtrackGo.mainLevelPot = new components.Pot({
     },
 });
 
-// in EQ mode (shift load 1) controls the high EQ of Deck 2, otherwise the headphone gain
+// in EQ mode (both load buttons) controls the high EQ of Deck 2, otherwise the headphone gain
 NumarkMixtrackGo.cueLevelPot = new components.Pot({
     masterGroup: "[Master]",
     eqGroup: "[EqualizerRack1_[Channel2]_Effect1]",
@@ -847,7 +919,7 @@ NumarkMixtrackGo.cueLevelPot = new components.Pot({
     input: function(_channel, _control, value) {
         this.newValue = Math.round(script.absoluteLin(value, 0, 1, 0, 127) * 100) / 100;
 
-        if (filterLowSwitch === 1) {
+        if (levelsSwitch === 1) {
             // High EQ Deck 2
             engine.setParameter(this.eqGroup, "parameter3", this.newValue);
         } else {
@@ -875,7 +947,7 @@ NumarkMixtrackGo.Deck = function(deckIndex, deckNumber) {
 
     // load status led control - doubles as the EQ mode indicator (lit while in EQ mode)
     this.updateLoadLed = function() {
-        if (filterLowSwitch === 1) {
+        if (levelsSwitch === 1) {
             NumarkMixtrackGo.led.setLoadBright(deckIndex);
         } else if (engine.getValue(group, "track_loaded") === 1) {
             NumarkMixtrackGo.led.setLoadBright(deckIndex);
@@ -1328,7 +1400,7 @@ NumarkMixtrackGo.Deck = function(deckIndex, deckNumber) {
         input: function(_channel, _control, value) {
             this.newValue = Math.round(script.absoluteLin(value, 0, 1, 0, 127) * 100) / 100;
 
-            if (filterLowSwitch === 1) {
+            if (levelsSwitch === 1) {
                 // Mid EQ
                 engine.setParameter(this.eqGroup, "parameter2", this.newValue);
             } else {

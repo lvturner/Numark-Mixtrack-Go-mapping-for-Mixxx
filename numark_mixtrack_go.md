@@ -59,10 +59,10 @@ This controller has a built-in 4 channel output sound card, with a stereo Main o
   - A knob for browsing the Library. If pushed, loads a track on the Preview Deck.
 * - **2**
   - {hwlabel}`LOAD`
-  - Each button loads a track to the Deck on their side. The button LED stays on while in EQ mode ({hwlabel}`SHIFT` + {hwlabel}`LOAD 1`).
+  - Each button loads a track to the Deck on their side (with a short delay, so that a combined press can be detected). Pressing **both {hwlabel}`LOAD` buttons together** toggles the mixer knobs between Filter mode and EQ mode (see {hwlabel}`MAIN LEVEL`, {hwlabel}`CUE LEVEL` and {hwlabel}`LEVEL` below). The button LEDs stay on while in EQ mode.
 * - **-**
   - {hwlabel}`SHIFT` + {hwlabel}`LOAD 1`
-  - Switches the mixer knobs between two modes: Filter mode ({hwlabel}`FILTER/LOW` → Quick Effect, {hwlabel}`LEVEL` → Volume, {hwlabel}`MAIN LEVEL` → Master Gain, {hwlabel}`CUE LEVEL` → Headphone Gain) and EQ mode ({hwlabel}`FILTER/LOW` → Low EQ, {hwlabel}`LEVEL` → Mid EQ, {hwlabel}`MAIN LEVEL` → High EQ of Deck 1, {hwlabel}`CUE LEVEL` → High EQ of Deck 2).
+  - Switches the {hwlabel}`FILTER/LOW` knobs between controlling the channels Quick Effect and the Low EQ.
 * - **-**
   - {hwlabel}`SHIFT` + {hwlabel}`LOAD 2`
   - Toggles the Vinyl mode in the Jogwheel.
@@ -71,13 +71,13 @@ This controller has a built-in 4 channel output sound card, with a stereo Main o
   - There is currently no functionality for this LED in Mixxx.
 * - **4**
   - {hwlabel}`MAIN LEVEL`
-  - Controls the Main Output Gain. In EQ mode ({hwlabel}`SHIFT` + {hwlabel}`LOAD 1`), controls the High EQ of Deck 1.
+  - Controls the Main Output Gain. In EQ mode (both {hwlabel}`LOAD` buttons), controls the High EQ of Deck 1.
 * - **5**
   - {hwlabel}`CUE LEVEL`
-  - Controls the Headphone Gain. In EQ mode ({hwlabel}`SHIFT` + {hwlabel}`LOAD 1`), controls the High EQ of Deck 2.
+  - Controls the Headphone Gain. In EQ mode (both {hwlabel}`LOAD` buttons), controls the High EQ of Deck 2.
 * - **6**
   - {hwlabel}`LEVEL`
-  - Controls each channel's Volume. In EQ mode ({hwlabel}`SHIFT` + {hwlabel}`LOAD 1`), controls the Mid EQ.
+  - Controls each channel's Volume. In EQ mode (both {hwlabel}`LOAD` buttons), controls the Mid EQ.
 * - **7**
   - {hwlabel}`FILTER/LOW`
   - Controls the Quick Effect currently selected for that channel, or the Low EQ. Use {hwlabel}`SHIFT` + {hwlabel}`LOAD 1` to switch between the Effect and Low EQ. Select the Effect in the Mixxx graphical interface.

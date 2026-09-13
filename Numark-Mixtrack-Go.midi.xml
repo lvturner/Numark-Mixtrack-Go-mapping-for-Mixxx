@@ -76,22 +76,22 @@
       </control>
       <control>
         <group>[Channel1]</group>
-        <key>LoadSelectedTrack</key>
+        <key>NumarkMixtrackGo.leftLoad.input</key>
         <description>load</description>
         <status>0x9F</status>
         <midino>0x02</midino>
         <options>
-          <normal/>
+          <script-binding/>
         </options>
       </control>
       <control>
         <group>[Channel2]</group>
-        <key>LoadSelectedTrack</key>
+        <key>NumarkMixtrackGo.rightLoad.input</key>
         <description>load</description>
         <status>0x9F</status>
         <midino>0x03</midino>
         <options>
-          <normal/>
+          <script-binding/>
         </options>
       </control>
       <control>
