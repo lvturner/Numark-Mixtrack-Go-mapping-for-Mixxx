@@ -949,7 +949,11 @@ NumarkMixtrackGo.Deck = function(deckIndex, deckNumber) {
     let connections = [];
     const makeConn = function(g, c, cb) {
         const conn = engine.makeConnection(g, c, cb);
-        connections.push(conn);
+        // controls that do not exist yet (e.g. stem groups before a stems track is
+        // loaded) make engine.makeConnection return undefined - skip those
+        if (conn) {
+            connections.push(conn);
+        }
         return conn;
     };
     this.connections = connections;
